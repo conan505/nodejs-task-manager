@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const userSchema = mongoose.Schema({
     name: {
@@ -32,9 +33,27 @@ const userSchema = mongoose.Schema({
         validate(value) {
             if (value.includes("password")) throw new Error('Password should not contains password');
         }
-
-    }
+    },
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 })
+
+// Jwt token generation method ( methods on schema are called by the instance of a model object)
+
+userSchema.methods.generateAuthToken = async function () {
+    const user = this;
+    const token = await jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse');
+    user.tokens.push({ token });
+    await user.save();
+    return token;
+}
+
+
+// Login method for users (statics on schema are called by the model object)
 
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
