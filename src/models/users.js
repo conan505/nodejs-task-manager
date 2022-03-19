@@ -42,6 +42,20 @@ const userSchema = mongoose.Schema({
     }]
 })
 
+// method for hiding sensitive of user (toJSON is called whenever JSON.stringify is called on an object)
+
+userSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+
+}
+
+
 // Jwt token generation method ( methods on schema are called by the instance of a model object)
 
 userSchema.methods.generateAuthToken = async function () {
