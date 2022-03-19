@@ -74,7 +74,7 @@ userSchema.methods.toJSON = function () {
 
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
-    const token = await jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse');
+    const token = await jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
     user.tokens.push({ token });
     await user.save();
     return token;
@@ -102,7 +102,6 @@ userSchema.pre('save', async function (next) {
 
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8);
-        console.log(user.password)
     }
 
     next();
