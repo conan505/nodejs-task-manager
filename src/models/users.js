@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const Task = require('./tasks');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -40,6 +41,14 @@ const userSchema = mongoose.Schema({
             required: true
         }
     }]
+})
+
+// Setting virutal property tasks for users
+
+userSchema.virtual('tasks', {
+    'ref': 'Task',
+    'localField': '_id',
+    'foreignField': 'owner'
 })
 
 // method for hiding sensitive of user (toJSON is called whenever JSON.stringify is called on an object)
@@ -94,6 +103,14 @@ userSchema.pre('save', async function (next) {
     next();
 })
 
-const User = new mongoose.model('Users', userSchema)
+// Middleware for deleting tasks when a user is removed
+
+userSchema.pre('remove', async function(next) {
+    const user = this
+    await Task.deleteMany({owner: user._id});
+    next()
+})
+
+const User = new mongoose.model('User', userSchema)
 
 module.exports = User;
