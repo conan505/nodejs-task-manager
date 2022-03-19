@@ -41,6 +41,8 @@ const userSchema = mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
 })
 
 // Setting virutal property tasks for users
@@ -105,9 +107,9 @@ userSchema.pre('save', async function (next) {
 
 // Middleware for deleting tasks when a user is removed
 
-userSchema.pre('remove', async function(next) {
+userSchema.pre('remove', async function (next) {
     const user = this
-    await Task.deleteMany({owner: user._id});
+    await Task.deleteMany({ owner: user._id });
     next()
 })
 
